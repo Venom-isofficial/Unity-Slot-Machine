@@ -1,71 +1,46 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public Reel reel1, reel2, reel3;
-
-    public int balance = 1000;
-    public int bet = 10;
+    public Reel reel1;
+    public Reel reel2;
+    public Reel reel3;
 
     public GameObject winPopup;
-    public AudioManager audioManager;
 
     public void Spin()
     {
-        if (balance < bet)
-        {
-            Debug.Log("Not enough balance!");
-            return;
-        }
-
-        balance -= bet;
-        audioManager.PlaySpin();
-
         StartCoroutine(SpinRoutine());
     }
 
     IEnumerator SpinRoutine()
     {
-        yield return StartCoroutine(reel1.Spin(1.5f));
-        yield return StartCoroutine(reel2.Spin(2f));
-        yield return StartCoroutine(reel3.Spin(2.5f));
+        yield return StartCoroutine(reel1.Spin());
+        yield return new WaitForSeconds(0.2f);
+
+        yield return StartCoroutine(reel2.Spin());
+        yield return new WaitForSeconds(0.2f);
+
+        yield return StartCoroutine(reel3.Spin());
 
         CheckWin();
     }
 
     void CheckWin()
     {
-        var a = reel1.GetFinalSymbol();
-        var b = reel2.GetFinalSymbol();
-        var c = reel3.GetFinalSymbol();
+        int r1 = reel1.GetResult();
+        int r2 = reel2.GetResult();
+        int r3 = reel3.GetResult();
 
-        if (a == b && b == c)
+        if (r1 == r2 && r2 == r3)
         {
-            int winAmount = bet * 5;
-            balance += winAmount;
-
-            Debug.Log("WIN +" + winAmount);
-            audioManager.PlayWin();
-
+            Debug.Log("WIN 🎉");
             winPopup.SetActive(true);
         }
         else
         {
-            Debug.Log("LOSE");
+            Debug.Log("Lose");
         }
-
-        Debug.Log("Balance: " + balance);
-    }
-
-    public void SetBet(int value)
-    {
-        bet = value;
-        Debug.Log("Bet: " + bet);
-    }
-
-    public void ClosePopup()
-    {
-        winPopup.SetActive(false);
     }
 }

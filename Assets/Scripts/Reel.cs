@@ -1,42 +1,52 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class Reel : MonoBehaviour
 {
-    public Image symbolImage;
-    public Sprite[] symbols;
+    public Image[] slots;              // size = 3 (top, center, bottom)
+    public Sprite[] symbolSprites;     // your symbols (7, cherry, bell, etc)
 
     public float spinSpeed = 0.05f;
+    public int spinCycles = 20;
 
-    private Sprite finalSymbol;
+    private int currentCenterIndex;
 
-    public IEnumerator Spin(float duration)
+    public IEnumerator Spin()
     {
-        float timer = 0;
-
-        while (timer < duration)
+        for (int i = 0; i < spinCycles; i++)
         {
-            symbolImage.sprite = GetWeightedSymbol();
-            timer += spinSpeed;
+            SpinStep();
             yield return new WaitForSeconds(spinSpeed);
         }
-
-        finalSymbol = symbolImage.sprite;
     }
 
-    Sprite GetWeightedSymbol()
+    void SpinStep()
     {
-        int rand = Random.Range(0, 100);
+        // shift down
+        slots[2].sprite = slots[1].sprite;
+        slots[1].sprite = slots[0].sprite;
 
-        if (rand < 50) return symbols[0]; // cherry
-        if (rand < 75) return symbols[1]; // bell
-        if (rand < 90) return symbols[2]; // bar
-        return symbols[3]; // seven
+        // new random at top
+        int rand = Random.Range(0, symbolSprites.Length);
+        slots[0].sprite = symbolSprites[rand];
+
+        // update center index
+        currentCenterIndex = GetSpriteIndex(slots[1].sprite);
     }
 
-    public Sprite GetFinalSymbol()
+    int GetSpriteIndex(Sprite s)
     {
-        return finalSymbol;
+        for (int i = 0; i < symbolSprites.Length; i++)
+        {
+            if (symbolSprites[i] == s)
+                return i;
+        }
+        return -1;
+    }
+
+    public int GetResult()
+    {
+        return currentCenterIndex;
     }
 }
