@@ -7,17 +7,35 @@ public class Reel : MonoBehaviour
     public Image[] slots;
     public Sprite[] symbolSprites;
 
-    public float spinSpeed = 0.05f;
-    public int spinCycles = 20;
+    public float minSpinSpeed = 0.02f;
+    public float maxSpinSpeed = 0.1f;
+    public int spinCycles = 25;
 
     private int currentCenterIndex;
 
-    public IEnumerator Spin()
+    public IEnumerator Spin(bool isLastReel = false, bool anticipation = false)
     {
+        float speed = minSpinSpeed;
+
         for (int i = 0; i < spinCycles; i++)
         {
             SpinStep();
-            yield return new WaitForSeconds(spinSpeed);
+
+            //  Anticipation slow down
+            if (anticipation && i > spinCycles * 0.6f)
+                speed = Mathf.Lerp(speed, maxSpinSpeed, 0.1f);
+
+            yield return new WaitForSeconds(speed);
+        }
+
+        //  Final slow dramatic stop
+        if (isLastReel)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                SpinStep();
+                yield return new WaitForSeconds(maxSpinSpeed + (i * 0.02f));
+            }
         }
 
         AudioManager.instance.PlayStopTick();
@@ -44,14 +62,8 @@ public class Reel : MonoBehaviour
         return -1;
     }
 
-    public int GetResult()
-    {
-        return currentCenterIndex;
-    }
-
     public SymbolType GetSymbolType()
     {
-        int index = GetSpriteIndex(slots[1].sprite);
-        return (SymbolType)index;
+        return (SymbolType)GetSpriteIndex(slots[1].sprite);
     }
 }

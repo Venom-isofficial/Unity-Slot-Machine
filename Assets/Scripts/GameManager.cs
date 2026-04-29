@@ -4,21 +4,18 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public Reel reel1;
-    public Reel reel2;
-    public Reel reel3;
-
+    public Reel reel1, reel2, reel3;
     public WinManager winManager;
-
     public HandleController handle;
 
     public TextMeshProUGUI balanceText;
     public TextMeshProUGUI winText;
     public GameObject winPopup;
 
+    public CameraShake cameraShake;
+
     private int balance = 1000;
     private int currentBet = 10;
-
     private bool spinning = false;
 
     void Start()
@@ -29,7 +26,6 @@ public class GameManager : MonoBehaviour
     public void SetBet(int bet)
     {
         currentBet = bet;
-        Debug.Log("Bet set: " + bet);
     }
 
     public void Spin()
@@ -50,11 +46,21 @@ public class GameManager : MonoBehaviour
 
         yield return StartCoroutine(handle.PullHandle());
 
+        StartCoroutine(cameraShake.Shake(0.2f, 0.1f));
+
         AudioManager.instance.PlaySpin();
 
+        //  Spin reels with stagger
         yield return StartCoroutine(reel1.Spin());
+        yield return new WaitForSeconds(0.1f);
+
         yield return StartCoroutine(reel2.Spin());
-        yield return StartCoroutine(reel3.Spin());
+        yield return new WaitForSeconds(0.15f);
+
+        //  Check anticipation
+        bool anticipation = reel1.GetSymbolType() == reel2.GetSymbolType();
+
+        yield return StartCoroutine(reel3.Spin(true, anticipation));
 
         AudioManager.instance.StopSpin();
 
@@ -74,27 +80,55 @@ public class GameManager : MonoBehaviour
         if (payout > 0)
         {
             balance += payout;
-            winPopup.SetActive(true);
-            winText.text = "YOU WIN: " + payout;
+
+            StartCoroutine(WinEffect(payout));
 
             AudioManager.instance.PlayWin();
-
-            // ✨ future hook: glow symbols
-            Debug.Log("WIN EFFECT");
+            StartCoroutine(cameraShake.Shake(0.3f, 0.2f));
         }
         else if (winManager.IsNearMiss(r1, r2, r3))
         {
-            Debug.Log("NEAR MISS 🎯");
-
-            // 🔥 optional polish:
-            // play tease sound
-            // slight shake
+            //  Near miss effect
+            StartCoroutine(cameraShake.Shake(0.15f, 0.05f));
         }
 
         UpdateUI();
     }
 
+    IEnumerator WinEffect(int payout)
+    {
+        winPopup.SetActive(true);
 
+        int display = 0;
+
+        while (display < payout)
+        {
+            display += Mathf.CeilToInt(payout * Time.deltaTime * 5);
+            display = Mathf.Min(display, payout);
+
+            winText.text = "YOU WIN: " + display;
+            yield return null;
+        }
+
+        // 🎯 Bounce effect
+        StartCoroutine(Bounce(winPopup.transform));
+    }
+
+    IEnumerator Bounce(Transform obj)
+    {
+        Vector3 original = obj.localScale;
+
+        float t = 0;
+        while (t < 1)
+        {
+            t += Time.deltaTime * 5;
+            float scale = 1 + Mathf.Sin(t * Mathf.PI) * 0.2f;
+            obj.localScale = original * scale;
+            yield return null;
+        }
+
+        obj.localScale = original;
+    }
 
     void UpdateUI()
     {
