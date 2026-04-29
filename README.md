@@ -20,7 +20,7 @@ The game demonstrates:
 
 ![Gameplay Screenshot](images/gameplay-main.png)
 
-![Win Effects](images/win-effects.png)
+![DEv Mode](images/DevMode.png)
 
 
 ## Features
