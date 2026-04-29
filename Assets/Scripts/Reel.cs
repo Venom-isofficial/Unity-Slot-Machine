@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class Reel : MonoBehaviour
 {
-    public Image[] slots;              
+    public Image[] slots;
     public Sprite[] symbolSprites;
 
     public float spinSpeed = 0.05f;
@@ -47,5 +47,11 @@ public class Reel : MonoBehaviour
     public int GetResult()
     {
         return currentCenterIndex;
+    }
+
+    public SymbolType GetSymbolType()
+    {
+        int index = GetSpriteIndex(slots[1].sprite);
+        return (SymbolType)index;
     }
 }

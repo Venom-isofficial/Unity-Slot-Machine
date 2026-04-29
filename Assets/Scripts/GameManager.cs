@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -7,15 +8,34 @@ public class GameManager : MonoBehaviour
     public Reel reel2;
     public Reel reel3;
 
-    public GameObject winPopup;
+    public WinManager winManager;
 
     public HandleController handle;
 
+    public TextMeshProUGUI balanceText;
+    public TextMeshProUGUI winText;
+    public GameObject winPopup;
+
+    private int balance = 1000;
+    private int currentBet = 10;
+
     private bool spinning = false;
+
+    void Start()
+    {
+        UpdateUI();
+    }
+
+    public void SetBet(int bet)
+    {
+        currentBet = bet;
+        Debug.Log("Bet set: " + bet);
+    }
 
     public void Spin()
     {
         if (spinning) return;
+        if (balance < currentBet) return;
 
         StartCoroutine(SpinRoutine());
     }
@@ -23,24 +43,19 @@ public class GameManager : MonoBehaviour
     IEnumerator SpinRoutine()
     {
         spinning = true;
-
         winPopup.SetActive(false);
 
-        // handle animation
+        balance -= currentBet;
+        UpdateUI();
+
         yield return StartCoroutine(handle.PullHandle());
 
-        // start sound
         AudioManager.instance.PlaySpin();
 
         yield return StartCoroutine(reel1.Spin());
-        yield return new WaitForSeconds(0.2f);
-
         yield return StartCoroutine(reel2.Spin());
-        yield return new WaitForSeconds(0.2f);
-
         yield return StartCoroutine(reel3.Spin());
 
-        // stop spin sound
         AudioManager.instance.StopSpin();
 
         CheckWin();
@@ -50,15 +65,39 @@ public class GameManager : MonoBehaviour
 
     void CheckWin()
     {
-        int r1 = reel1.GetResult();
-        int r2 = reel2.GetResult();
-        int r3 = reel3.GetResult();
+        SymbolType r1 = reel1.GetSymbolType();
+        SymbolType r2 = reel2.GetSymbolType();
+        SymbolType r3 = reel3.GetSymbolType();
 
-        if (r1 == r2 && r2 == r3)
+        int payout = winManager.CalculateWin(r1, r2, r3, currentBet);
+
+        if (payout > 0)
         {
-            Debug.Log("WIN 🎉");
+            balance += payout;
             winPopup.SetActive(true);
+            winText.text = "YOU WIN: " + payout;
+
             AudioManager.instance.PlayWin();
+
+            // ✨ future hook: glow symbols
+            Debug.Log("WIN EFFECT");
         }
+        else if (winManager.IsNearMiss(r1, r2, r3))
+        {
+            Debug.Log("NEAR MISS 🎯");
+
+            // 🔥 optional polish:
+            // play tease sound
+            // slight shake
+        }
+
+        UpdateUI();
+    }
+
+
+
+    void UpdateUI()
+    {
+        balanceText.text = "Balance: " + balance;
     }
 }
