@@ -1,17 +1,27 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class HandleController : MonoBehaviour
 {
     public Image handleImage;
-    public Sprite upSprite;
-    public Sprite downSprite;
 
-    public IEnumerator Pull()
+    public Sprite handleUp;
+    public Sprite handleDown;
+
+    public float pressTime = 0.15f;
+
+    public IEnumerator PullHandle()
     {
-        handleImage.sprite = downSprite;
-        yield return new WaitForSeconds(0.2f);
-        handleImage.sprite = upSprite;
+        // play sound
+        AudioManager.instance.PlayLever();
+
+        // switch to DOWN sprite
+        handleImage.sprite = handleDown;
+
+        yield return new WaitForSeconds(pressTime);
+
+        // back to UP sprite
+        handleImage.sprite = handleUp;
     }
 }

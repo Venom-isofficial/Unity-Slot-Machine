@@ -9,13 +9,29 @@ public class GameManager : MonoBehaviour
 
     public GameObject winPopup;
 
+    public HandleController handle;
+
+    private bool spinning = false;
+
     public void Spin()
     {
+        if (spinning) return;
+
         StartCoroutine(SpinRoutine());
     }
 
     IEnumerator SpinRoutine()
     {
+        spinning = true;
+
+        winPopup.SetActive(false);
+
+        // handle animation
+        yield return StartCoroutine(handle.PullHandle());
+
+        // start sound
+        AudioManager.instance.PlaySpin();
+
         yield return StartCoroutine(reel1.Spin());
         yield return new WaitForSeconds(0.2f);
 
@@ -24,7 +40,12 @@ public class GameManager : MonoBehaviour
 
         yield return StartCoroutine(reel3.Spin());
 
+        // stop spin sound
+        AudioManager.instance.StopSpin();
+
         CheckWin();
+
+        spinning = false;
     }
 
     void CheckWin()
@@ -37,10 +58,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("WIN 🎉");
             winPopup.SetActive(true);
-        }
-        else
-        {
-            Debug.Log("Lose");
+            AudioManager.instance.PlayWin();
         }
     }
 }

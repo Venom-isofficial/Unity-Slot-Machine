@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class Reel : MonoBehaviour
 {
-    public Image[] slots;              // size = 3 (top, center, bottom)
-    public Sprite[] symbolSprites;     // your symbols (7, cherry, bell, etc)
+    public Image[] slots;              
+    public Sprite[] symbolSprites;
 
     public float spinSpeed = 0.05f;
     public int spinCycles = 20;
@@ -19,19 +19,18 @@ public class Reel : MonoBehaviour
             SpinStep();
             yield return new WaitForSeconds(spinSpeed);
         }
+
+        AudioManager.instance.PlayStopTick();
     }
 
     void SpinStep()
     {
-        // shift down
         slots[2].sprite = slots[1].sprite;
         slots[1].sprite = slots[0].sprite;
 
-        // new random at top
         int rand = Random.Range(0, symbolSprites.Length);
         slots[0].sprite = symbolSprites[rand];
 
-        // update center index
         currentCenterIndex = GetSpriteIndex(slots[1].sprite);
     }
 
