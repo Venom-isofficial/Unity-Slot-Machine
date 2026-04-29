@@ -88,7 +88,6 @@ Press **Ctrl+D** to open the hidden debug menu. This gives you access to:
 - **Simulate Mega Win** - Instantly land 3x Crown (30x payout)
 - **Simulate Big Win** - Instantly land 3x Coin
 - **Simulate Near-Miss** - Land 2x Seven + Apple (for testing camera shake)
-- **Add Balance** - Give yourself extra coins to keep playing
 
 Perfect for testing win animations without having to grind spins manually.
 

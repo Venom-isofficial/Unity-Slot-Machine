@@ -49,9 +49,4 @@ public class DebugManager : MonoBehaviour
     public void SimulateBigWin() => gameManager.SimulateWin(SymbolType.Coin, SymbolType.Coin, SymbolType.Coin);
     public void SimulateNearMiss() => gameManager.SimulateWin(SymbolType.Seven, SymbolType.Seven, SymbolType.Apple);
 
-    public void AddBalance(int amount)
-    {
-        gameManager.AddBalance(amount);
-        Debug.Log($"Balance +{amount}");
-    }
 }
