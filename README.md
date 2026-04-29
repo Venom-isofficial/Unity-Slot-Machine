@@ -20,7 +20,7 @@ The game demonstrates:
 
 ![Gameplay Screenshot](images/gameplay-main.png)
 
-![DEv Mode](images/DevMode.png)
+![DEv Mode](images/Devmode.png)
 
 
 ## Features
