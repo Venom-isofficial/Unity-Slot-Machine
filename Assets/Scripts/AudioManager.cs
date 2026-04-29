@@ -4,16 +4,12 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager instance;
 
-    public AudioSource sfxSource;
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip spinLoop;
+    [SerializeField] private AudioClip winSound;
+    [SerializeField] private AudioClip leverSound;
 
-    public AudioClip spinLoop;
-    public AudioClip winSound;
-    public AudioClip leverSound;
-
-    private void Awake()
-    {
-        instance = this;
-    }
+    private void Awake() => instance = this;
 
     public void PlaySpin()
     {
@@ -22,18 +18,7 @@ public class AudioManager : MonoBehaviour
         sfxSource.Play();
     }
 
-    public void StopSpin()
-    {
-        sfxSource.Stop();
-    }
-
-    public void PlayWin()
-    {
-        sfxSource.PlayOneShot(winSound);
-    }
-
-    public void PlayLever()
-    {
-        sfxSource.PlayOneShot(leverSound);
-    }
+    public void StopSpin() => sfxSource.Stop();
+    public void PlayWin() => sfxSource.PlayOneShot(winSound);
+    public void PlayLever() => sfxSource.PlayOneShot(leverSound);
 }
