@@ -83,12 +83,19 @@ public class GameManager : MonoBehaviour
 
             StartCoroutine(WinEffect(payout));
 
+            // 🎯 CALL ALL FX FROM WINMANAGER
+            winManager.PlayWinFX(
+                payout,
+                currentBet,
+                reel1.GetCenterSlot(),
+                reel2.GetCenterSlot(),
+                reel3.GetCenterSlot()
+            );
+
             AudioManager.instance.PlayWin();
-            StartCoroutine(cameraShake.Shake(0.3f, 0.2f));
         }
         else if (winManager.IsNearMiss(r1, r2, r3))
         {
-            //  Near miss effect
             StartCoroutine(cameraShake.Shake(0.15f, 0.05f));
         }
 
@@ -133,5 +140,61 @@ public class GameManager : MonoBehaviour
     void UpdateUI()
     {
         balanceText.text = "Balance: " + balance;
+    }
+
+    // 🐛 DEBUG: Get current bet
+    public int GetCurrentBet()
+    {
+        return currentBet;
+    }
+
+    // 🐛 DEBUG: Add balance
+    public void AddBalance(int amount)
+    {
+        balance += amount;
+        UpdateUI();
+    }
+
+    // 🐛 DEBUG: Simulate win with specific symbols
+    public void SimulateWin(SymbolType s1, SymbolType s2, SymbolType s3)
+    {
+        if (spinning) return;
+        if (balance < currentBet) return;
+
+        StartCoroutine(SimulateSpinRoutine(s1, s2, s3));
+    }
+
+    // 🐛 DEBUG: Simulated spin routine
+    IEnumerator SimulateSpinRoutine(SymbolType s1, SymbolType s2, SymbolType s3)
+    {
+        spinning = true;
+        winPopup.SetActive(false);
+
+        balance -= currentBet;
+        UpdateUI();
+
+        yield return StartCoroutine(handle.PullHandle());
+
+        StartCoroutine(cameraShake.Shake(0.2f, 0.1f));
+
+        AudioManager.instance.PlaySpin();
+
+        //  Force symbols with stagger
+        yield return StartCoroutine(reel1.SpinToSymbol(s1));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(reel2.SpinToSymbol(s2));
+        yield return new WaitForSeconds(0.15f);
+
+        //  Check anticipation
+        bool anticipation = s1 == s2;
+
+        yield return StartCoroutine(reel3.SpinToSymbol(s3, true, anticipation));
+
+        AudioManager.instance.StopSpin();
+
+        CheckWin();
+
+        spinning = false;
     }
 }

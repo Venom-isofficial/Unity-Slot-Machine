@@ -7,7 +7,6 @@ public class AudioManager : MonoBehaviour
     public AudioSource sfxSource;
 
     public AudioClip spinLoop;
-    public AudioClip stopTick;
     public AudioClip winSound;
     public AudioClip leverSound;
 
@@ -26,11 +25,6 @@ public class AudioManager : MonoBehaviour
     public void StopSpin()
     {
         sfxSource.Stop();
-    }
-
-    public void PlayStopTick()
-    {
-        sfxSource.PlayOneShot(stopTick);
     }
 
     public void PlayWin()

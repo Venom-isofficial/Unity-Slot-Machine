@@ -7,38 +7,34 @@ public class Reel : MonoBehaviour
     public Image[] slots;
     public Sprite[] symbolSprites;
 
-    public float minSpinSpeed = 0.02f;
-    public float maxSpinSpeed = 0.1f;
+    public float minSpeed = 0.02f;
+    public float maxSpeed = 0.12f;
     public int spinCycles = 25;
 
     private int currentCenterIndex;
 
-    public IEnumerator Spin(bool isLastReel = false, bool anticipation = false)
+    public IEnumerator Spin(bool isLast = false, bool anticipation = false)
     {
-        float speed = minSpinSpeed;
+        float speed = minSpeed;
 
         for (int i = 0; i < spinCycles; i++)
         {
             SpinStep();
 
-            //  Anticipation slow down
             if (anticipation && i > spinCycles * 0.6f)
-                speed = Mathf.Lerp(speed, maxSpinSpeed, 0.1f);
+                speed = Mathf.Lerp(speed, maxSpeed, 0.1f);
 
             yield return new WaitForSeconds(speed);
         }
 
-        //  Final slow dramatic stop
-        if (isLastReel)
+        if (isLast)
         {
             for (int i = 0; i < 5; i++)
             {
                 SpinStep();
-                yield return new WaitForSeconds(maxSpinSpeed + (i * 0.02f));
+                yield return new WaitForSeconds(maxSpeed + i * 0.02f);
             }
         }
-
-        AudioManager.instance.PlayStopTick();
     }
 
     void SpinStep()
@@ -56,8 +52,7 @@ public class Reel : MonoBehaviour
     {
         for (int i = 0; i < symbolSprites.Length; i++)
         {
-            if (symbolSprites[i] == s)
-                return i;
+            if (symbolSprites[i] == s) return i;
         }
         return -1;
     }
@@ -65,5 +60,49 @@ public class Reel : MonoBehaviour
     public SymbolType GetSymbolType()
     {
         return (SymbolType)GetSpriteIndex(slots[1].sprite);
+    }
+
+    public Image GetCenterSlot()
+    {
+        return slots[1];
+    }
+
+    // 🐛 DEBUG: Spin to specific symbol
+    public IEnumerator SpinToSymbol(SymbolType targetSymbol, bool isLast = false, bool anticipation = false)
+    {
+        float speed = minSpeed;
+
+        for (int i = 0; i < spinCycles; i++)
+        {
+            SpinStep();
+
+            if (anticipation && i > spinCycles * 0.6f)
+                speed = Mathf.Lerp(speed, maxSpeed, 0.1f);
+
+            yield return new WaitForSeconds(speed);
+        }
+
+        if (isLast)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                SpinStep();
+                yield return new WaitForSeconds(maxSpeed + i * 0.02f);
+            }
+        }
+
+        // Force the target symbol on center
+        ForceSymbol(targetSymbol);
+    }
+
+    // 🐛 DEBUG: Force a specific symbol to center
+    public void ForceSymbol(SymbolType targetSymbol)
+    {
+        int targetIndex = (int)targetSymbol;
+        if (targetIndex < symbolSprites.Length)
+        {
+            slots[1].sprite = symbolSprites[targetIndex];
+            currentCenterIndex = targetIndex;
+        }
     }
 }
